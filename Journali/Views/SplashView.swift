@@ -9,7 +9,7 @@ struct SplashView: View {
 
             // MARK: - Background
 // وثخص
-            //uu
+            
             LinearGradient(
                 colors: [
                     Color(hex: 0x000000),
