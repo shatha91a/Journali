@@ -8,8 +8,7 @@ struct SplashView: View {
         ZStack {
 
             // MARK: - Background
-// وثخص
-            
+  
             LinearGradient(
                 colors: [
                     Color(hex: 0x000000),
