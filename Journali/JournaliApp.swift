@@ -5,7 +5,9 @@
 //  Created by shatha on 29/05/1448 AH.
 //
 
+
 import SwiftUI
+import SwiftData
 
 @main
 struct JournaliApp: App {
@@ -13,5 +15,6 @@ struct JournaliApp: App {
         WindowGroup {
             ContentView()
         }
+        .modelContainer(for: JournalEntry.self)
     }
 }

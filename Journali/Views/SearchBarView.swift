@@ -10,15 +10,19 @@ import SwiftUI
 
 struct SearchBarView: View {
 
+    @Bindable var viewModel: JournalViewModel
+
     var body: some View {
         HStack(spacing: 8) {
 
             Image(systemName: "magnifyingglass")
                 .foregroundStyle(AppColors.secondaryText)
 
-            Text("Search")
+            TextField("Search", text: $viewModel.searchText)
                 .font(AppFonts.captionMedium)
-                .foregroundStyle(AppColors.secondaryText)
+                .foregroundStyle(AppColors.primaryText)
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled()
 
             Spacer()
 
@@ -29,14 +33,5 @@ struct SearchBarView: View {
         .padding(.vertical, 12)
         .frame(maxWidth: .infinity)
         .background(AppColors.surface, in: Capsule())
-    }
-}
-
-#Preview {
-    ZStack {
-        AppColors.background
-            .ignoresSafeArea()
-
-    SearchBarView()
     }
 }

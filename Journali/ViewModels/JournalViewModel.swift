@@ -11,18 +11,34 @@ final class JournalViewModel {
     private let modelContext: ModelContext
 
     var searchText = ""
+    var isNewestFirst = true
+    var showBookmarkedOnly = false
 
-    // MARK: - Filtered Journals
+    
+    // MARK: - Filtered & Sorted Journals
+    
     var filteredJournals: [JournalEntry] {
-        guard !searchText.isEmpty else {
-            return journals
+        let results = journals.filter { journal in
+            let matchesSearch =
+                searchText.isEmpty ||
+                journal.title.localizedCaseInsensitiveContains(searchText) ||
+                journal.content.localizedCaseInsensitiveContains(searchText)
+
+            let matchesBookmark =
+                !showBookmarkedOnly || journal.isBookmarked
+
+            return matchesSearch && matchesBookmark
         }
 
-        return journals.filter { journal in
-            journal.title.localizedCaseInsensitiveContains(searchText) ||
-            journal.content.localizedCaseInsensitiveContains(searchText)
+        return results.sorted { first, second in
+            if isNewestFirst {
+                return first.createdAt > second.createdAt
+            } else {
+                return first.createdAt < second.createdAt
+            }
         }
     }
+
 
     // MARK: - Initializer
     init(modelContext: ModelContext) {

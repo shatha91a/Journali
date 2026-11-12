@@ -1,24 +1,27 @@
-//
-//  HomeView.swift
-//  Journali
-//
-//  Created by shatha on 01/06/1448 AH.
-//
 
 import SwiftUI
 
 struct HomeView: View {
 
+    let viewModel: JournalViewModel
+
+    @State private var showingAddJournal = false
+    @State private var selectedJournal: JournalEntry?
+    @State private var journalToDelete: JournalEntry?
+    @State private var showDeleteConfirmation = false
+
     var body: some View {
 
         ZStack {
+
             AppColors.background
                 .ignoresSafeArea()
 
             VStack {
-                
+
                 // MARK: - Header
                 HStack {
+
                     Text("Journal")
                         .font(AppFonts.headingLarge)
                         .foregroundStyle(AppColors.primaryText)
@@ -26,14 +29,37 @@ struct HomeView: View {
                     Spacer()
 
                     HStack(spacing: 20) {
-                        Button {
-                            // Filter action - سنضيفه لاحقًا
+
+                        Menu {
+
+                            Button {
+                                viewModel.showBookmarkedOnly.toggle()
+                            } label: {
+                                Label(
+                                    viewModel.showBookmarkedOnly
+                                        ? "Show All Journals"
+                                        : "Sort by Bookmark",
+                                    systemImage: "bookmark"
+                                )
+                            }
+
+                            Button {
+                                viewModel.isNewestFirst.toggle()
+                            } label: {
+                                Label(
+                                    viewModel.isNewestFirst
+                                        ? "Oldest First"
+                                        : "Newest First",
+                                    systemImage: "calendar"
+                                )
+                            }
+
                         } label: {
                             Image(systemName: "line.3.horizontal.decrease")
                         }
 
                         Button {
-                            // Add action - سنضيفه لاحقًا
+                            showingAddJournal = true
                         } label: {
                             Image(systemName: "plus")
                         }
@@ -46,22 +72,99 @@ struct HomeView: View {
                 }
                 .padding(.horizontal, AppSpacing.medium)
                 .padding(.top, AppSpacing.medium)
-                Spacer()
 
-                // MARK: - Empty State
-                EmptyStateView()
-                    .frame(maxWidth: .infinity)
+                // MARK: - Journal List
+                if viewModel.filteredJournals.isEmpty {
 
-                Spacer()
+                    Spacer()
+
+                    EmptyStateView()
+                        .frame(maxWidth: .infinity)
+
+                    Spacer()
+
+                } else {
+
+                    ScrollView {
+
+                        LazyVStack(spacing: AppSpacing.medium) {
+
+                            ForEach(viewModel.filteredJournals) { journal in
+
+                                JournalCardView(journal: journal) {
+                                    viewModel.toggleBookmark(for: journal)
+                                }
+                                .onTapGesture {
+                                    selectedJournal = journal
+                                }
+                                .swipeActions(
+                                    edge: .trailing,
+                                    allowsFullSwipe: false
+                                ) {
+                                    Button(role: .destructive) {
+                                        journalToDelete = journal
+                                        showDeleteConfirmation = true
+                                    } label: {
+                                        Image(systemName: "trash")
+                                    }
+                                }
+                            }
+                        }
+                        .padding(.horizontal, AppSpacing.medium)
+                        .padding(.vertical, AppSpacing.medium)
+                    }
+                }
+
                 // MARK: - Search Bar
-                SearchBarView()
+                SearchBarView(viewModel: viewModel)
                     .padding(.horizontal, AppSpacing.medium)
                     .padding(.bottom, AppSpacing.medium)
             }
+
+            // MARK: - Delete Confirmation
+            if showDeleteConfirmation {
+
+                DeleteConfirmationView {
+
+                    // Cancel
+                    showDeleteConfirmation = false
+                    journalToDelete = nil
+
+                } onDelete: {
+
+                    // Delete
+                    if let journal = journalToDelete {
+                        viewModel.deleteJournal(journal)
+                    }
+
+                    showDeleteConfirmation = false
+                    journalToDelete = nil
+                }
+                .zIndex(1)
+            }
+        }
+
+        // MARK: - Add Journal Sheet
+        .sheet(isPresented: $showingAddJournal) {
+
+            JournalFormView { title, content in
+                viewModel.addJournal(
+                    title: title,
+                    content: content
+                )
+            }
+        }
+
+        // MARK: - Edit Journal Sheet
+        .sheet(item: $selectedJournal) { journal in
+
+            JournalFormView(journal: journal) { title, content in
+                viewModel.editJournal(
+                    journal,
+                    title: title,
+                    content: content
+                )
+            }
         }
     }
-}
-
-#Preview {
-    HomeView()
 }

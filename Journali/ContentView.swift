@@ -6,14 +6,36 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct ContentView: View {
 
+    @Environment(\.modelContext) private var modelContext
+
+    @State private var viewModel: JournalViewModel?
+
     var body: some View {
-        SplashView()
+        Group {
+            if let viewModel {
+                HomeView(viewModel: viewModel)
+            } else {
+                SplashView()
+            }
+        }
+        .task {
+            if viewModel == nil {
+                let newViewModel = JournalViewModel(
+                    modelContext: modelContext
+                )
+
+                newViewModel.fetchJournals()
+                viewModel = newViewModel
+            }
+        }
     }
 }
 
 #Preview {
     ContentView()
+        .modelContainer(for: JournalEntry.self)
 }
