@@ -221,7 +221,7 @@ private struct DiscardChangesAlert: View {
                 alignment: .top
             )
             .glassEffect(
-                .regular.tint(.black.opacity(0.70)),
+                .regular.tint(.black.opacity(0.57)),
                 in: .rect(cornerRadius: cardRadius)
             )
             .padding(.leading, cardLeading)
