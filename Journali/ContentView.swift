@@ -22,6 +22,7 @@ struct ContentView: View {
                 SplashView()
             }
         }
+
         .task {
             if viewModel == nil {
                 let newViewModel = JournalViewModel(
@@ -29,6 +30,10 @@ struct ContentView: View {
                 )
 
                 newViewModel.fetchJournals()
+
+                // Wait for 2 seconds
+                try? await Task.sleep(nanoseconds: 2_000_000_000)
+
                 viewModel = newViewModel
             }
         }
