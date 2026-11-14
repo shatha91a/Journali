@@ -7,6 +7,8 @@ struct SearchBarView: View {
 
     @State private var speechRecognizer = SpeechRecognizer()
 
+    @FocusState private var isSearchFocused: Bool
+
     var body: some View {
 
         HStack(spacing: 8) {
@@ -19,16 +21,29 @@ struct SearchBarView: View {
                 .foregroundStyle(AppColors.primaryText)
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled()
-
+                .focused($isSearchFocused)
+                .submitLabel(.search)
+                .onSubmit {
+                    isSearchFocused = false
+                }
             Spacer()
 
             Button {
+
                 if speechRecognizer.isRecording {
+
                     speechRecognizer.stopRecording()
+
                 } else {
+
+                    // Hide keyboard before recording
+                    isSearchFocused = false
+
                     speechRecognizer.startRecording()
                 }
+
             } label: {
+
                 Image(
                     systemName: speechRecognizer.isRecording
                     ? "waveform"
@@ -47,12 +62,14 @@ struct SearchBarView: View {
         .frame(maxWidth: .infinity)
         .background(AppColors.surface, in: Capsule())
 
+        // Update search text from speech recognition
         .onChange(of: speechRecognizer.recognizedText) {
             _, newValue in
 
             viewModel.searchText = newValue
         }
 
+        // Stop recording when leaving the screen
         .onDisappear {
             speechRecognizer.stopRecording()
         }

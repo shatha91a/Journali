@@ -35,6 +35,7 @@ struct HomeView: View {
                             Button {
                                 viewModel.showBookmarkedOnly.toggle()
                             } label: {
+
                                 Label(
                                     viewModel.showBookmarkedOnly
                                         ? "Show All Journals"
@@ -46,6 +47,7 @@ struct HomeView: View {
                             Button {
                                 viewModel.isNewestFirst.toggle()
                             } label: {
+
                                 Label(
                                     viewModel.isNewestFirst
                                         ? "Oldest First"
@@ -55,12 +57,14 @@ struct HomeView: View {
                             }
 
                         } label: {
+
                             Image(systemName: "line.3.horizontal.decrease")
                         }
 
                         Button {
                             showingAddJournal = true
                         } label: {
+
                             Image(systemName: "plus")
                         }
                     }
@@ -92,19 +96,25 @@ struct HomeView: View {
                             ForEach(viewModel.filteredJournals) { journal in
 
                                 JournalCardView(journal: journal) {
+
                                     viewModel.toggleBookmark(for: journal)
                                 }
                                 .onTapGesture {
+
                                     selectedJournal = journal
                                 }
                                 .swipeActions(
                                     edge: .trailing,
                                     allowsFullSwipe: false
                                 ) {
+
                                     Button(role: .destructive) {
+
                                         journalToDelete = journal
                                         showDeleteConfirmation = true
+
                                     } label: {
+
                                         Image(systemName: "trash")
                                     }
                                 }
@@ -113,6 +123,7 @@ struct HomeView: View {
                         .padding(.horizontal, AppSpacing.medium)
                         .padding(.vertical, AppSpacing.medium)
                     }
+                    .scrollDismissesKeyboard(.interactively)
                 }
 
                 // MARK: - Search Bar
@@ -134,6 +145,7 @@ struct HomeView: View {
 
                     // Delete
                     if let journal = journalToDelete {
+
                         viewModel.deleteJournal(journal)
                     }
 
@@ -148,6 +160,7 @@ struct HomeView: View {
         .sheet(isPresented: $showingAddJournal) {
 
             JournalFormView { title, content in
+
                 viewModel.addJournal(
                     title: title,
                     content: content
@@ -159,6 +172,7 @@ struct HomeView: View {
         .sheet(item: $selectedJournal) { journal in
 
             JournalFormView(journal: journal) { title, content in
+
                 viewModel.editJournal(
                     journal,
                     title: title,
