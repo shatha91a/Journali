@@ -208,8 +208,7 @@ private struct DiscardChangesAlert: View {
                     alertButton(
                         "Keep Editing",
                         color: AppColors.primaryText,
-                        action: onKeepEditing
-                    )
+                        action: onKeepEditing                    )
                 }
             }
             .padding(.horizontal, sidePadding)

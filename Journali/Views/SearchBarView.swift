@@ -4,7 +4,7 @@ import SwiftUI
 struct SearchBarView: View {
 
     @Bindable var viewModel: JournalViewModel
-
+    let isJournalFormPresented: Bool
     @State private var speechRecognizer = SpeechRecognizer()
 
     @FocusState private var isSearchFocused: Bool
@@ -67,6 +67,12 @@ struct SearchBarView: View {
             _, newValue in
 
             viewModel.searchText = newValue
+        }
+        .onChange(of: isJournalFormPresented) { _, isPresented in
+            if isPresented {
+                speechRecognizer.stopRecording()
+                isSearchFocused = false
+            }
         }
 
         // Stop recording when leaving the screen

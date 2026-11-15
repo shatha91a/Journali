@@ -20,6 +20,7 @@ struct HomeView: View {
             VStack {
 
                 // MARK: - Header
+
                 HStack {
 
                     Text("Journal")
@@ -33,38 +34,25 @@ struct HomeView: View {
                         Menu {
 
                             Button {
-                                viewModel.showBookmarkedOnly.toggle()
+                                viewModel.sortByBookmark = true
                             } label: {
-
-                                Label(
-                                    viewModel.showBookmarkedOnly
-                                        ? "Show All Journals"
-                                        : "Sort by Bookmark",
-                                    systemImage: "bookmark"
-                                )
+                                Text("Sort by Bookmark")
                             }
 
                             Button {
-                                viewModel.isNewestFirst.toggle()
+                                viewModel.sortByBookmark = false
+                                viewModel.isNewestFirst = true
                             } label: {
-
-                                Label(
-                                    viewModel.isNewestFirst
-                                        ? "Oldest First"
-                                        : "Newest First",
-                                    systemImage: "calendar"
-                                )
+                                Text("Sort by Entry Date")
                             }
 
                         } label: {
-
                             Image(systemName: "line.3.horizontal.decrease")
                         }
 
                         Button {
                             showingAddJournal = true
                         } label: {
-
                             Image(systemName: "plus")
                         }
                     }
@@ -78,6 +66,7 @@ struct HomeView: View {
                 .padding(.top, AppSpacing.medium)
 
                 // MARK: - Journal List
+
                 if viewModel.filteredJournals.isEmpty {
 
                     Spacer()
@@ -96,11 +85,9 @@ struct HomeView: View {
                             ForEach(viewModel.filteredJournals) { journal in
 
                                 JournalCardView(journal: journal) {
-
                                     viewModel.toggleBookmark(for: journal)
                                 }
                                 .onTapGesture {
-
                                     selectedJournal = journal
                                 }
                                 .swipeActions(
@@ -109,12 +96,9 @@ struct HomeView: View {
                                 ) {
 
                                     Button(role: .destructive) {
-
                                         journalToDelete = journal
                                         showDeleteConfirmation = true
-
                                     } label: {
-
                                         Image(systemName: "trash")
                                     }
                                 }
@@ -127,25 +111,28 @@ struct HomeView: View {
                 }
 
                 // MARK: - Search Bar
-                SearchBarView(viewModel: viewModel)
-                    .padding(.horizontal, AppSpacing.medium)
-                    .padding(.bottom, AppSpacing.medium)
+
+                SearchBarView(
+                    viewModel: viewModel,
+                    isJournalFormPresented:
+                        showingAddJournal || selectedJournal != nil
+                )
+                .padding(.horizontal, AppSpacing.medium)
+                .padding(.bottom, AppSpacing.medium)
             }
 
             // MARK: - Delete Confirmation
+
             if showDeleteConfirmation {
 
                 DeleteConfirmationView {
 
-                    // Cancel
                     showDeleteConfirmation = false
                     journalToDelete = nil
 
                 } onDelete: {
 
-                    // Delete
                     if let journal = journalToDelete {
-
                         viewModel.deleteJournal(journal)
                     }
 
@@ -157,6 +144,7 @@ struct HomeView: View {
         }
 
         // MARK: - Add Journal Sheet
+
         .sheet(isPresented: $showingAddJournal) {
 
             JournalFormView { title, content in
@@ -169,6 +157,7 @@ struct HomeView: View {
         }
 
         // MARK: - Edit Journal Sheet
+
         .sheet(item: $selectedJournal) { journal in
 
             JournalFormView(journal: journal) { title, content in

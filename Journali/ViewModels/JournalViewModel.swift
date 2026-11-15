@@ -1,3 +1,4 @@
+
 import SwiftData
 import Observation
 import Foundation
@@ -7,18 +8,21 @@ import Foundation
 final class JournalViewModel {
 
     // MARK: - Properties
+
     private(set) var journals: [JournalEntry] = []
     private let modelContext: ModelContext
 
     var searchText = ""
     var isNewestFirst = true
     var showBookmarkedOnly = false
+    var sortByBookmark = false
 
-    
     // MARK: - Filtered & Sorted Journals
-    
+
     var filteredJournals: [JournalEntry] {
+
         let results = journals.filter { journal in
+
             let matchesSearch =
                 searchText.isEmpty ||
                 journal.title.localizedCaseInsensitiveContains(searchText) ||
@@ -31,6 +35,14 @@ final class JournalViewModel {
         }
 
         return results.sorted { first, second in
+
+            // Sort bookmarked journals first only when enabled
+            if sortByBookmark &&
+                first.isBookmarked != second.isBookmarked {
+                return first.isBookmarked
+            }
+
+            // Sort by date
             if isNewestFirst {
                 return first.createdAt > second.createdAt
             } else {
@@ -39,13 +51,14 @@ final class JournalViewModel {
         }
     }
 
-
     // MARK: - Initializer
+
     init(modelContext: ModelContext) {
         self.modelContext = modelContext
     }
 
     // MARK: - Fetch Journals
+
     func fetchJournals() {
         do {
             let descriptor = FetchDescriptor<JournalEntry>()
@@ -56,6 +69,7 @@ final class JournalViewModel {
     }
 
     // MARK: - Add Journal
+
     func addJournal(title: String, content: String) {
         let newJournal = JournalEntry(
             title: title,
@@ -73,6 +87,7 @@ final class JournalViewModel {
     }
 
     // MARK: - Edit Journal
+
     func editJournal(
         _ journal: JournalEntry,
         title: String,
@@ -90,6 +105,7 @@ final class JournalViewModel {
     }
 
     // MARK: - Delete Journal
+
     func deleteJournal(_ journal: JournalEntry) {
         modelContext.delete(journal)
 
@@ -102,6 +118,7 @@ final class JournalViewModel {
     }
 
     // MARK: - Toggle Bookmark
+
     func toggleBookmark(for journal: JournalEntry) {
         journal.isBookmarked.toggle()
 
