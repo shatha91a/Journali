@@ -3,6 +3,8 @@ import SwiftUI
 
 struct JournalCardView: View {
 
+    // MARK: - Properties
+
     let journal: JournalEntry
     let onBookmarkTap: () -> Void
 
@@ -10,6 +12,7 @@ struct JournalCardView: View {
         VStack(alignment: .leading, spacing: 12) {
 
             // MARK: - Title and Bookmark
+
             HStack {
                 Text(journal.title)
                     .font(AppFonts.titleCard)
@@ -20,16 +23,19 @@ struct JournalCardView: View {
                 Button {
                     onBookmarkTap()
                 } label: {
-                    Image(systemName: journal.isBookmarked
-                          ? "bookmark.fill"
-                          : "bookmark")
-                        .font(.system(size: 18))
-                        .foregroundStyle(AppColors.textAccent)
+                    Image(
+                        systemName: journal.isBookmarked
+                            ? "bookmark.fill"
+                            : "bookmark"
+                    )
+                    .font(.system(size: 18))
+                    .foregroundStyle(AppColors.textAccent)
                 }
                 .buttonStyle(.plain)
             }
 
             // MARK: - Date
+
             Text(journal.createdAt.formatted(
                 date: .numeric,
                 time: .omitted
@@ -38,6 +44,7 @@ struct JournalCardView: View {
             .foregroundStyle(AppColors.secondaryText)
 
             // MARK: - Journal Content
+
             Text(journal.content)
                 .font(AppFonts.bodyMedium)
                 .foregroundStyle(AppColors.primaryText)

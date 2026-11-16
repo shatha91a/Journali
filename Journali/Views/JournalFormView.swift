@@ -1,63 +1,76 @@
+
 import SwiftUI
- 
+
 struct JournalFormView: View {
- 
+
     // MARK: - Environment
+
     @Environment(\.dismiss) private var dismiss
- 
+
     // MARK: - Properties
+
     let journal: JournalEntry?
     let onSave: (String, String) -> Void
- 
+
     // MARK: - State
+
     @State private var title: String
     @State private var content: String
     @State private var showDiscardConfirmation = false
- 
+
     // MARK: - Initializer
+
     init(
         journal: JournalEntry? = nil,
         onSave: @escaping (String, String) -> Void
     ) {
         self.journal = journal
         self.onSave = onSave
+
         _title = State(initialValue: journal?.title ?? "")
         _content = State(initialValue: journal?.content ?? "")
     }
- 
+
     // MARK: - Computed Properties
+
+    // Checks whether the user has made changes that are not saved.
     private var hasUnsavedChanges: Bool {
         guard let journal else {
             return !title.isEmpty || !content.isEmpty
         }
- 
+
         return title != journal.title ||
                content != journal.content
     }
- 
+
+    // Prevents saving when the title contains only whitespace.
     private var isSaveDisabled: Bool {
         title.trimmingCharacters(
             in: .whitespacesAndNewlines
         ).isEmpty
     }
- 
+
     // MARK: - Body
+
     var body: some View {
         ZStack {
             AppColors.surface
                 .ignoresSafeArea()
- 
+
             VStack(alignment: .leading, spacing: AppSpacing.medium) {
- 
+
                 // MARK: - Top Bar
+
                 topBar
- 
+
                 // MARK: - Title
+
                 TextField("Title", text: $title)
                     .font(AppFonts.headingLarge)
                     .foregroundStyle(AppColors.primaryText)
- 
+
                 // MARK: - Date
+
                 Text(
                     (journal?.createdAt ?? Date.now).formatted(
                         .dateTime
@@ -68,20 +81,22 @@ struct JournalFormView: View {
                 )
                 .font(AppFonts.captionMedium)
                 .foregroundStyle(AppColors.secondaryText)
- 
+
                 // MARK: - Journal Content
+
                 TextEditor(text: $content)
                     .font(AppFonts.bodyLarge)
                     .foregroundStyle(AppColors.primaryText)
                     .scrollContentBackground(.hidden)
                     .background(.clear)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
- 
+
                 Spacer(minLength: 0)
             }
             .padding(AppSpacing.medium)
- 
+
             // MARK: - Discard Confirmation
+
             if showDiscardConfirmation {
                 DiscardChangesAlert(
                     onKeepEditing: {
@@ -101,8 +116,9 @@ struct JournalFormView: View {
         .presentationDragIndicator(.visible)
         .presentationBackground(AppColors.surface)
     }
- 
+
     // MARK: - Top Bar
+
     private var topBar: some View {
         HStack {
             Button {
@@ -114,9 +130,9 @@ struct JournalFormView: View {
                     .frame(width: 40, height: 40)
                     .background(AppColors.surface, in: Circle())
             }
- 
+
             Spacer()
- 
+
             Button {
                 saveJournal()
             } label: {
@@ -129,8 +145,9 @@ struct JournalFormView: View {
             .disabled(isSaveDisabled)
         }
     }
- 
+
     // MARK: - Handle Close
+
     private func handleClose() {
         if hasUnsavedChanges {
             withAnimation(.easeOut(duration: 0.2)) {
@@ -140,16 +157,17 @@ struct JournalFormView: View {
             dismiss()
         }
     }
- 
+
     // MARK: - Save Journal
+
     private func saveJournal() {
         guard !isSaveDisabled else { return }
- 
+
         onSave(title, content)
         dismiss()
     }
 }
- 
+
 // MARK: - Discard Changes Alert
 
 private struct DiscardChangesAlert: View {
@@ -158,6 +176,7 @@ private struct DiscardChangesAlert: View {
     let onDiscard: () -> Void
 
     // MARK: - Design Dimensions
+
     private let cardWidth: CGFloat = 300
     private let cardHeight: CGFloat = 212
     private let cardRadius: CGFloat = 32
@@ -172,17 +191,20 @@ private struct DiscardChangesAlert: View {
     private let buttonHeight: CGFloat = 46
     private let buttonSpacing: CGFloat = 12
 
+    // MARK: - Body
+
     var body: some View {
         ZStack(alignment: .topLeading) {
 
             // MARK: - Background
+
             Color.black.opacity(0.08)
                 .ignoresSafeArea()
                 .onTapGesture(perform: onKeepEditing)
 
             // MARK: - Glass Alert
-            VStack(spacing: 0) {
 
+            VStack(spacing: 0) {
                 Text("Are you sure you want to discard changes on this journal?")
                     .font(AppFonts.captionMedium)
                     .lineSpacing(3)
@@ -197,8 +219,9 @@ private struct DiscardChangesAlert: View {
                         alignment: .topLeading
                     )
 
-                VStack(spacing: buttonSpacing) {
+                // MARK: - Alert Actions
 
+                VStack(spacing: buttonSpacing) {
                     alertButton(
                         "Discard Changes",
                         color: AppColors.destructive,
@@ -208,7 +231,8 @@ private struct DiscardChangesAlert: View {
                     alertButton(
                         "Keep Editing",
                         color: AppColors.primaryText,
-                        action: onKeepEditing                    )
+                        action: onKeepEditing
+                    )
                 }
             }
             .padding(.horizontal, sidePadding)
@@ -230,12 +254,12 @@ private struct DiscardChangesAlert: View {
     }
 
     // MARK: - Glass Buttons
+
     private func alertButton(
         _ title: String,
         color: Color,
         action: @escaping () -> Void
     ) -> some View {
-
         Button(action: action) {
             Text(title)
                 .font(AppFonts.captionMedium)
@@ -249,62 +273,4 @@ private struct DiscardChangesAlert: View {
         }
         .buttonStyle(.plain)
     }
-}
-// MARK: - Previews
-
-#Preview("Discard Alert") {
-    ZStack(alignment: .topLeading) {
-        AppColors.surface
-            .ignoresSafeArea()
-
-        // Background Journal Content
-        VStack(alignment: .leading, spacing: AppSpacing.medium) {
-
-            HStack {
-                Image(systemName: "xmark")
-                    .font(.system(size: 18, weight: .medium))
-                    .foregroundStyle(AppColors.primaryText)
-                    .frame(width: 40, height: 40)
-
-                Spacer()
-
-                Image(systemName: "checkmark")
-                    .font(.system(size: 22, weight: .semibold))
-                    .foregroundStyle(AppColors.background)
-                    .frame(width: 44, height: 44)
-                    .background(AppColors.primary, in: Circle())
-            }
-
-            Text("Great Day")
-                .font(AppFonts.headingLarge)
-                .foregroundStyle(AppColors.primaryText)
-
-            Text("12/11/2026")
-                .font(AppFonts.captionMedium)
-                .foregroundStyle(AppColors.secondaryText)
-
-            Text("""
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-            Quisque volutpat mattis eros. Nullam malesuada erat ut turpis.
-            Suspendisse urna nibh, viverra non, semper suscipit posuere.
-            """)
-                .font(AppFonts.bodyLarge)
-                .foregroundStyle(AppColors.primaryText)
-
-            Spacer()
-        }
-        .padding(AppSpacing.medium)
-
-        // Discard Alert
-        DiscardChangesAlert(
-            onKeepEditing: {},
-            onDiscard: {}
-        )
-    }
-    .preferredColorScheme(.dark)
-}
-
-#Preview("Journal Form") {
-    JournalFormView(onSave: { _, _ in })
-        .preferredColorScheme(.dark)
 }

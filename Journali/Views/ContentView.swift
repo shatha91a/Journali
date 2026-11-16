@@ -1,18 +1,15 @@
-//
-//  ContentView.swift
-//  Journali
-//
-//  Created by shatha on 29/05/1448 AH.
-//
 
 import SwiftUI
 import SwiftData
 
 struct ContentView: View {
 
-    @Environment(\.modelContext) private var modelContext
+    // MARK: - Properties
 
+    @Environment(\.modelContext) private var modelContext
     @State private var viewModel: JournalViewModel?
+
+    // MARK: - Body
 
     var body: some View {
         Group {
@@ -22,8 +19,8 @@ struct ContentView: View {
                 SplashView()
             }
         }
-
         .task {
+            // Initialize the ViewModel and load saved journals.
             if viewModel == nil {
                 let newViewModel = JournalViewModel(
                     modelContext: modelContext
@@ -31,7 +28,7 @@ struct ContentView: View {
 
                 newViewModel.fetchJournals()
 
-                // Wait for 2 seconds
+                // Keep the splash screen visible for 2 seconds.
                 try? await Task.sleep(nanoseconds: 2_000_000_000)
 
                 viewModel = newViewModel
@@ -39,7 +36,6 @@ struct ContentView: View {
         }
     }
 }
-
 #Preview {
     ContentView()
         .modelContainer(for: JournalEntry.self)

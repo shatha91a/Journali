@@ -3,6 +3,8 @@ import SwiftUI
 
 struct HomeView: View {
 
+    // MARK: - Properties
+
     let viewModel: JournalViewModel
 
     @State private var showingAddJournal = false
@@ -11,18 +13,14 @@ struct HomeView: View {
     @State private var showDeleteConfirmation = false
 
     var body: some View {
-
         ZStack {
-
-            AppColors.background
-                .ignoresSafeArea()
+            AppColors.background.ignoresSafeArea()
 
             VStack {
 
                 // MARK: - Header
 
                 HStack {
-
                     Text("Journal")
                         .font(AppFonts.headingLarge)
                         .foregroundStyle(AppColors.primaryText)
@@ -30,22 +28,15 @@ struct HomeView: View {
                     Spacer()
 
                     HStack(spacing: 20) {
-
                         Menu {
-
-                            Button {
+                            Button("Sort by Bookmark") {
                                 viewModel.sortByBookmark = true
-                            } label: {
-                                Text("Sort by Bookmark")
                             }
 
-                            Button {
+                            Button("Sort by Entry Date") {
                                 viewModel.sortByBookmark = false
                                 viewModel.isNewestFirst = true
-                            } label: {
-                                Text("Sort by Entry Date")
                             }
-
                         } label: {
                             Image(systemName: "line.3.horizontal.decrease")
                         }
@@ -60,7 +51,10 @@ struct HomeView: View {
                     .foregroundStyle(AppColors.primaryText)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 12)
-                    .background(AppColors.surface, in: Capsule())
+                    .glassEffect(
+                        .regular.tint(AppColors.surface.opacity(0.85)),
+                        in: .capsule
+                    )
                 }
                 .padding(.horizontal, AppSpacing.medium)
                 .padding(.top, AppSpacing.medium)
@@ -68,22 +62,16 @@ struct HomeView: View {
                 // MARK: - Journal List
 
                 if viewModel.filteredJournals.isEmpty {
-
                     Spacer()
 
                     EmptyStateView()
                         .frame(maxWidth: .infinity)
 
                     Spacer()
-
                 } else {
-
                     ScrollView {
-
                         LazyVStack(spacing: AppSpacing.medium) {
-
                             ForEach(viewModel.filteredJournals) { journal in
-
                                 JournalCardView(journal: journal) {
                                     viewModel.toggleBookmark(for: journal)
                                 }
@@ -94,7 +82,6 @@ struct HomeView: View {
                                     edge: .trailing,
                                     allowsFullSwipe: false
                                 ) {
-
                                     Button(role: .destructive) {
                                         journalToDelete = journal
                                         showDeleteConfirmation = true
@@ -124,14 +111,10 @@ struct HomeView: View {
             // MARK: - Delete Confirmation
 
             if showDeleteConfirmation {
-
                 DeleteConfirmationView {
-
                     showDeleteConfirmation = false
                     journalToDelete = nil
-
                 } onDelete: {
-
                     if let journal = journalToDelete {
                         viewModel.deleteJournal(journal)
                     }
@@ -146,22 +129,15 @@ struct HomeView: View {
         // MARK: - Add Journal Sheet
 
         .sheet(isPresented: $showingAddJournal) {
-
             JournalFormView { title, content in
-
-                viewModel.addJournal(
-                    title: title,
-                    content: content
-                )
+                viewModel.addJournal(title: title, content: content)
             }
         }
 
         // MARK: - Edit Journal Sheet
 
         .sheet(item: $selectedJournal) { journal in
-
             JournalFormView(journal: journal) { title, content in
-
                 viewModel.editJournal(
                     journal,
                     title: title,

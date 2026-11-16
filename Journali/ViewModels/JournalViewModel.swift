@@ -20,9 +20,7 @@ final class JournalViewModel {
     // MARK: - Filtered & Sorted Journals
 
     var filteredJournals: [JournalEntry] {
-
         let results = journals.filter { journal in
-
             let matchesSearch =
                 searchText.isEmpty ||
                 journal.title.localizedCaseInsensitiveContains(searchText) ||
@@ -35,14 +33,13 @@ final class JournalViewModel {
         }
 
         return results.sorted { first, second in
-
-            // Sort bookmarked journals first only when enabled
+            // Prioritize bookmarked entries when bookmark sorting is enabled.
             if sortByBookmark &&
                 first.isBookmarked != second.isBookmarked {
                 return first.isBookmarked
             }
 
-            // Sort by date
+            // Keep entries ordered by creation date.
             if isNewestFirst {
                 return first.createdAt > second.createdAt
             } else {

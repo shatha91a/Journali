@@ -3,16 +3,19 @@ import SwiftUI
 
 struct SearchBarView: View {
 
+    // MARK: - Properties
+
     @Bindable var viewModel: JournalViewModel
     let isJournalFormPresented: Bool
-    @State private var speechRecognizer = SpeechRecognizer()
 
+    @State private var speechRecognizer = SpeechRecognizer()
     @FocusState private var isSearchFocused: Bool
 
     var body: some View {
 
-        HStack(spacing: 8) {
+        // MARK: - Search Interface
 
+        HStack(spacing: 8) {
             Image(systemName: "magnifyingglass")
                 .foregroundStyle(AppColors.secondaryText)
 
@@ -26,33 +29,26 @@ struct SearchBarView: View {
                 .onSubmit {
                     isSearchFocused = false
                 }
+
             Spacer()
 
             Button {
-
                 if speechRecognizer.isRecording {
-
                     speechRecognizer.stopRecording()
-
                 } else {
-
-                    // Hide keyboard before recording
                     isSearchFocused = false
-
                     speechRecognizer.startRecording()
                 }
-
             } label: {
-
                 Image(
                     systemName: speechRecognizer.isRecording
-                    ? "waveform"
-                    : "mic"
+                        ? "waveform"
+                        : "mic"
                 )
                 .foregroundStyle(
                     speechRecognizer.isRecording
-                    ? AppColors.primary
-                    : AppColors.secondaryText
+                        ? AppColors.primary
+                        : AppColors.secondaryText
                 )
             }
             .buttonStyle(.plain)
@@ -60,14 +56,19 @@ struct SearchBarView: View {
         .padding(.horizontal, AppSpacing.medium)
         .padding(.vertical, 12)
         .frame(maxWidth: .infinity)
-        .background(AppColors.surface, in: Capsule())
+        .glassEffect(
+            .regular.tint(AppColors.surface.opacity(0.85)),
+            in: .capsule
+        )
 
-        // Update search text from speech recognition
-        .onChange(of: speechRecognizer.recognizedText) {
-            _, newValue in
+        // MARK: - Speech Recognition
 
+        .onChange(of: speechRecognizer.recognizedText) { _, newValue in
             viewModel.searchText = newValue
         }
+
+        // MARK: - Stop Recording
+
         .onChange(of: isJournalFormPresented) { _, isPresented in
             if isPresented {
                 speechRecognizer.stopRecording()
@@ -75,7 +76,8 @@ struct SearchBarView: View {
             }
         }
 
-        // Stop recording when leaving the screen
+        // MARK: - Cleanup
+
         .onDisappear {
             speechRecognizer.stopRecording()
         }

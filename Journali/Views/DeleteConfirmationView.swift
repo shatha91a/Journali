@@ -1,24 +1,25 @@
-//
-//  DeleteConfirmationView.swift
-//  Journali
-//
-//  Created by shatha on 02/06/1448 AH.
-//
 
 import SwiftUI
 
 struct DeleteConfirmationView: View {
 
+    // MARK: - Properties
+
     let onCancel: () -> Void
     let onDelete: () -> Void
 
+    // MARK: - Body
+
     var body: some View {
         ZStack {
+            // MARK: - Background
+
             Color.black.opacity(0.65)
                 .ignoresSafeArea()
 
-            VStack(alignment: .leading, spacing: 12) {
+            // MARK: - Confirmation Alert
 
+            VStack(alignment: .leading, spacing: 12) {
                 Text("Delete Journal?")
                     .font(AppFonts.captionMedium)
                     .foregroundStyle(AppColors.primaryText)
@@ -28,8 +29,9 @@ struct DeleteConfirmationView: View {
                     .foregroundStyle(AppColors.secondaryText)
                     .fixedSize(horizontal: false, vertical: true)
 
-                HStack(spacing: 8) {
+                // MARK: - Alert Actions
 
+                HStack(spacing: 8) {
                     Button(action: onCancel) {
                         Text("Cancel")
                             .font(AppFonts.captionMedium)
@@ -41,6 +43,7 @@ struct DeleteConfirmationView: View {
                                 in: Capsule()
                             )
                     }
+                    .buttonStyle(.plain)
 
                     Button(action: onDelete) {
                         Text("Delete")
@@ -53,16 +56,16 @@ struct DeleteConfirmationView: View {
                                 in: Capsule()
                             )
                     }
+                    .buttonStyle(.plain)
                 }
                 .padding(.top, 4)
             }
             .padding(16)
             .frame(width: 270)
-            .background(
-                Color(hex: 0x1C1C1E),
-                in: RoundedRectangle(cornerRadius: 24)
+            .glassEffect(
+                .regular.tint(AppColors.surface.opacity(0.9)),
+                in: .rect(cornerRadius: 24)
             )
         }
     }
 }
-

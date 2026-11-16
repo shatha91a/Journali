@@ -4,6 +4,8 @@ import SwiftUI
 import AVFoundation
 
 // MARK: - Speech Request Box
+
+// Safely passes the speech request across concurrency boundaries.
 private final class SpeechRequestBox: @unchecked Sendable {
 
     let request: SFSpeechAudioBufferRecognitionRequest
@@ -18,6 +20,8 @@ private final class SpeechRequestBox: @unchecked Sendable {
 }
 
 // MARK: - Audio Buffer Box
+
+// Safely holds audio buffers captured by the audio engine.
 private final class AudioBufferBox: @unchecked Sendable {
 
     nonisolated(unsafe) let buffer: AVAudioPCMBuffer
@@ -28,9 +32,12 @@ private final class AudioBufferBox: @unchecked Sendable {
 }
 
 // MARK: - Speech Recognizer
+
 @MainActor
 @Observable
 final class SpeechRecognizer {
+
+    // MARK: - Properties
 
     var recognizedText = ""
     var isRecording = false
@@ -45,8 +52,8 @@ final class SpeechRecognizer {
     private var isTapInstalled = false
 
     // MARK: - Start Recording
-    func startRecording() {
 
+    func startRecording() {
         guard !isRecording && !isStarting else {
             return
         }
@@ -54,8 +61,8 @@ final class SpeechRecognizer {
         isStarting = true
         recognizedText = ""
 
+        // Select Arabic or English based on the device language.
         let languageCode = Locale.preferredLanguages.first ?? "en-US"
-
         let locale = languageCode.hasPrefix("ar")
             ? Locale(identifier: "ar-SA")
             : Locale(identifier: "en-US")
@@ -63,10 +70,9 @@ final class SpeechRecognizer {
         print("Speech language: \(locale.identifier)")
         print("Requesting speech recognition permission...")
 
+        // Request speech recognition permission.
         SFSpeechRecognizer.requestAuthorization { [weak self] status in
-
             Task { @MainActor in
-
                 guard let self else { return }
 
                 guard status == .authorized else {
@@ -89,10 +95,9 @@ final class SpeechRecognizer {
 
                 print("Speech recognizer is available.")
 
+                // Request microphone permission.
                 AVAudioApplication.requestRecordPermission { granted in
-
                     Task { @MainActor in
-
                         guard granted else {
                             print("Microphone permission denied.")
                             self.isStarting = false
@@ -100,7 +105,6 @@ final class SpeechRecognizer {
                         }
 
                         print("Microphone permission granted.")
-
                         self.beginRecording(using: recognizer)
                     }
                 }
@@ -109,8 +113,8 @@ final class SpeechRecognizer {
     }
 
     // MARK: - Begin Recording
-    private func beginRecording(using recognizer: SFSpeechRecognizer) {
 
+    private func beginRecording(using recognizer: SFSpeechRecognizer) {
         stopRecording()
         recognizedText = ""
         isStarting = true
@@ -118,8 +122,7 @@ final class SpeechRecognizer {
         print("Starting speech recognition...")
 
         do {
-
-            // Configure audio session
+            // Configure and activate the audio session.
             try audioSession.setCategory(
                 .record,
                 mode: .measurement,
@@ -138,21 +141,20 @@ final class SpeechRecognizer {
                 return
             }
 
+            // Create the speech recognition request.
             let request = SFSpeechAudioBufferRecognitionRequest()
-
             recognitionRequest = request
             request.shouldReportPartialResults = true
 
             let requestBox = SpeechRequestBox(request: request)
             let inputNode = audioEngine.inputNode
 
-            // Install audio tap
+            // Capture audio input and pass it to the recognition request.
             try inputNode.installAudioTap(
                 onBus: 0,
                 bufferSize: 8192,
                 format: nil
             ) { buffer, _ in
-
                 let audioBuffer = AVAudioPCMBuffer(copying: buffer)
                 let bufferBox = AudioBufferBox(buffer: audioBuffer)
 
@@ -162,20 +164,16 @@ final class SpeechRecognizer {
             }
 
             isTapInstalled = true
-
             print("Audio tap installed.")
 
-            // Start speech recognition task
+            // Start the speech recognition task.
             recognitionTask = recognizer.recognitionTask(
                 with: request
             ) { [weak self] result, error in
-
                 Task { @MainActor in
-
                     guard let self else { return }
 
                     if let result {
-
                         self.recognizedText =
                             result.bestTranscription.formattedString
 
@@ -183,27 +181,22 @@ final class SpeechRecognizer {
                     }
 
                     if let error {
-
                         print(
                             "Speech Recognition Error: \(error.localizedDescription)"
                         )
-
                         print("Error details: \(error)")
-
                         self.stopRecording()
                         return
                     }
 
                     if result?.isFinal == true {
-
                         print("Recognition finished.")
-
                         self.stopRecording()
                     }
                 }
             }
 
-            // Start audio engine
+            // Prepare and start the audio engine.
             audioEngine.prepare()
             try audioEngine.start()
 
@@ -214,28 +207,28 @@ final class SpeechRecognizer {
             print("Recording is active.")
 
         } catch {
-
             print("Recording failed: \(error.localizedDescription)")
             print("Error details: \(error)")
-
             stopRecording()
         }
     }
 
     // MARK: - Stop Recording
-    func stopRecording() {
 
+    func stopRecording() {
         print("Stopping speech recognition...")
 
         if audioEngine.isRunning {
             audioEngine.stop()
         }
 
+        // Remove the audio tap if it was installed.
         if isTapInstalled {
             audioEngine.inputNode.removeTap(onBus: 0)
             isTapInstalled = false
         }
 
+        // Release speech recognition resources.
         recognitionRequest?.endAudio()
         recognitionTask?.cancel()
 
@@ -245,8 +238,8 @@ final class SpeechRecognizer {
         isRecording = false
         isStarting = false
 
+        // Deactivate the audio session.
         do {
-
             try audioSession.setActive(
                 false,
                 options: .notifyOthersOnDeactivation
@@ -255,7 +248,6 @@ final class SpeechRecognizer {
             print("Audio session deactivated.")
 
         } catch {
-
             print("Audio session error: \(error.localizedDescription)")
         }
     }
