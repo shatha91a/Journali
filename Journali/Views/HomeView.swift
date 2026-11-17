@@ -32,7 +32,10 @@ struct HomeView: View {
                             Button("Sort by Bookmark") {
                                 viewModel.sortByBookmark = true
                             }
+                            
+                            Divider()
 
+                            
                             Button("Sort by Entry Date") {
                                 viewModel.sortByBookmark = false
                                 viewModel.isNewestFirst = true
