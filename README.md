@@ -32,4 +32,4 @@ The project follows the MVVM (Model-View-ViewModel) architecture to keep the cod
 
 A journey built with big dreams. Thank you for being part of my journey.
 
-**Shatha**
+<p align= "center"> - Shatha
