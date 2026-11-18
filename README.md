@@ -4,6 +4,8 @@
 
 Journali is a personal journaling app that allows users to capture their thoughts, write daily entries, and keep their memories organized in one place. It provides a simple and comfortable space for self-expression.
 
+<p align="center">   <img src="journali-preview.png" alt="Journali Preview" width="700"> </p>
+
 ## Main Features
 
 - **Create Entries:** Create new journal entries with a title and content.
@@ -20,8 +22,9 @@ Journali is a personal journaling app that allows users to capture their thought
 - Swift
 - SwiftUI
 - SwiftData
-  
+
 ## Project Structure
+
 The project follows the MVVM (Model-View-ViewModel) architecture to keep the code organized and separate the user interface from application logic and data management.
 
 - **Model:** Defines the journal entry data model.
@@ -32,4 +35,4 @@ The project follows the MVVM (Model-View-ViewModel) architecture to keep the cod
 
 A journey built with big dreams. Thank you for being part of my journey.
 
-<p align= "center"> - Shatha
+\<p align="center">- Shatha 🤎\</p>
